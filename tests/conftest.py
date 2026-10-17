@@ -94,3 +94,13 @@ def make_transcript(duration: float = 8.0) -> Transcript:
 @pytest.fixture
 def transcript() -> Transcript:
     return make_transcript()
+
+
+def pytest_collection_modifyitems(config, items):
+    gates = {"network": "VVF_NETWORK_TESTS", "models": "VVF_MODEL_TESTS", "cloud": "VVF_CLOUD_TESTS"}
+    import os
+
+    for item in items:
+        for marker, env in gates.items():
+            if marker in item.keywords and os.environ.get(env) != "1":
+                item.add_marker(pytest.mark.skip(reason=f"defina {env}=1 para rodar"))

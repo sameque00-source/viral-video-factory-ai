@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 from typing import Protocol
 
 from pydantic import BaseModel
 
 from vvf.config import Settings
+from vvf.errors import UserInputError
 from vvf.pipeline.runner import StepOutcome, StepResult, run_step, upstream
 from vvf.project import Project
 
@@ -32,6 +34,7 @@ class Transcript(BaseModel):
     duration: float
     model: str
     segments: list[Segment]
+    edits: list[str] = []  # correções manuais ("povo→polvo (2x)")
 
     def full_text(self) -> str:
         return " ".join(s.text.strip() for s in self.segments)
@@ -87,15 +90,80 @@ class FasterWhisperTranscriber:
         )
 
 
+def _case_like(original: str, replacement: str) -> str:
+    if original.isupper() and len(original) > 1:
+        return replacement.upper()
+    if original[:1].isupper():
+        return replacement[:1].upper() + replacement[1:]
+    return replacement
+
+
+def replace_word(project: Project, old: str, new: str) -> int:
+    """Corrige uma palavra mal transcrita (palavra inteira, preserva maiúsculas e pontuação).
+
+    Atualiza transcrição, legendas (palavras com timestamp) e o plano (gancho/título/citações
+    que vieram da transcrição). Devolve quantas ocorrências foram trocadas.
+    """
+    if not old.strip() or not new.strip():
+        raise UserInputError("informe a palavra errada e a correta")
+    pattern = re.compile(rf"(?<!\w){re.escape(old)}(?!\w)", re.IGNORECASE)
+    count = 0
+
+    def sub(text: str) -> str:
+        nonlocal count
+        out, n = pattern.subn(lambda m: _case_like(m.group(0), new), text)
+        count += n
+        return out
+
+    transcript = load_transcript(project)
+    word_hits = 0
+    for seg in transcript.segments:
+        seg.text = sub(seg.text)
+        for w in seg.words:
+            before = w.text
+            w.text = pattern.sub(lambda m: _case_like(m.group(0), new), w.text)
+            word_hits += before != w.text
+    if count == 0:
+        raise UserInputError(f"'{old}' não aparece na transcrição")
+    transcript.edits.append(f"{old}→{new} ({count}x)")
+    rec = project.manifest.steps["transcribe"]
+    project.path(rec.outputs["transcript"]).write_text(transcript.model_dump_json(indent=2), encoding="utf-8")
+
+    from vvf.pipeline import plan as planmod  # evita import circular
+
+    if planmod.plan_path(project).exists():
+        plan = planmod.load_plan(project)
+        for clip in plan.clips:
+            if clip.hook_source == "transcript":
+                clip.hook = pattern.sub(lambda m: _case_like(m.group(0), new), clip.hook)
+                clip.title = pattern.sub(lambda m: _case_like(m.group(0), new), clip.title)
+                clip.description = pattern.sub(lambda m: _case_like(m.group(0), new), clip.description)
+            clip.quotes = [pattern.sub(lambda m: _case_like(m.group(0), new), q) for q in clip.quotes]
+        plan.transcript_sha = planmod.transcript_sha(transcript)
+        plan.status = "draft"  # conteúdo mudou: revisar e aprovar de novo
+        planmod.save_plan(project, plan)
+    project.save()
+    return count
+
+
 def transcribe(
     project: Project,
     settings: Settings,
     transcriber: Transcriber | None = None,
     *,
     force: bool = False,
+    discard_edits: bool = False,
 ) -> StepOutcome:
     ingest = project.manifest.steps.get("ingest")
     assert ingest is not None, "importe o vídeo antes de transcrever"
+    if force and not discard_edits:
+        try:
+            if load_transcript(project).edits:
+                raise UserInputError(
+                    "há correções manuais na transcrição: use --discard-edits para refazer do zero"
+                )
+        except FileNotFoundError:
+            pass
     transcriber = transcriber or FasterWhisperTranscriber(
         settings.vvf_whisper_model, settings.vvf_whisper_device, settings.vvf_whisper_compute_type
     )

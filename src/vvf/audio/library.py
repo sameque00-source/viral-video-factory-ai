@@ -57,7 +57,7 @@ class Library:
         raise UserInputError(f"item de áudio não encontrado na biblioteca: {item_id}")
 
     def path(self, item: LibraryItem) -> Path:
-        return self.root / item.file
+        return (self.root / item.file).resolve()  # absoluto: o FFmpeg roda em outro diretório
 
     def add(
         self, src: Path, *, item_id: str, kind: str, title: str, license: str, source: str,

@@ -231,3 +231,32 @@ def test_parse_loudnorm_json_handles_silence_and_noise():
     assert parse_loudnorm_json(ok)["input_i"] == "-20.1"
     silent = '{\n "input_i" : "-inf",\n "input_tp" : "-inf"\n}'
     assert parse_loudnorm_json(silent) is None
+
+
+def test_relative_library_path_works_even_though_ffmpeg_runs_inside_the_project(
+    ready, settings, tmp_path, monkeypatch
+):
+    """Regressão: caminho relativo da biblioteca quebrava porque o FFmpeg roda em cwd=pasta do projeto."""
+    monkeypatch.chdir(tmp_path)
+    lib = Library(Path("library/audio"))  # relativo, como na configuração padrão
+    lib.synth_builtin()
+    pad = lib.get("pad-calm")
+    music = AudioItem(pad.id, lib.path(pad), pad.sha256, pad.license)
+    assert music.path.is_absolute()
+    clip = planmod.load_plan(ready).get("c1")
+    rec = render_video(ready, settings, [clip], _opts(music=music), name="relpath")
+    assert all(rec.checks.values()), rec.checks
+
+
+def test_long_hook_overlay_wraps_inside_the_margins(ready, settings):
+    """Regressão: sem quebra de linha o gancho era cortado nas bordas do vídeo vertical."""
+    long_hook = "Você sabia que o polvo tem três corações e o sangue dele é azul por causa do cobre?"
+    planmod.edit_clip(ready, "c1", hook=long_hook)
+    clip = planmod.load_plan(ready).get("c1")
+    with_hook = render_video(ready, settings, [clip], _opts(captions=False, hook_overlay=True), name="hook")
+    without = render_video(ready, settings, [clip], _opts(captions=False), name="nohook")
+    a = _frame(ready.path(with_hook.path), 1.0).astype(int)
+    b = _frame(ready.path(without.path), 1.0).astype(int)
+    diff = np.abs(a - b).sum(axis=2) > 60  # onde o texto do gancho foi desenhado
+    assert diff.sum() > 2000  # o gancho aparece
+    assert diff[:, :40].sum() == 0 and diff[:, -40:].sum() == 0  # e não encosta nas bordas

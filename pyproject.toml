@@ -23,6 +23,9 @@ dependencies = [
     "ffmpeg-normalize>=1.43,<2",
 ]
 
+[project.scripts]
+vvf = "vvf.cli:main"
+
 [dependency-groups]
 dev = [
     "pytest>=9,<10",
@@ -49,4 +52,8 @@ select = ["E", "F", "I", "UP", "B"]
 testpaths = ["tests"]
 addopts = "-ra"
 pythonpath = ["tests"]
-markers = ["cloud: usa serviços pagos; nunca roda por padrão"]
+markers = [
+    "cloud: usa serviços pagos; nunca roda por padrão",
+    "network: acessa a internet (gratuito); só com VVF_NETWORK_TESTS=1",
+    "models: baixa modelos de IA locais; só com VVF_MODEL_TESTS=1",
+]

@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     vvf_allow_paid_calls: bool = False
     vvf_projects_dir: Path = Path("projects")
     vvf_cache_dir: Path = Path(".cache/vvf")
+    vvf_library_dir: Path = Path("library/audio")
 
     vvf_language: str = "pt"
     vvf_scene_threshold: float = Field(default=27.0, gt=0)
@@ -28,6 +29,11 @@ class Settings(BaseSettings):
     vvf_min_height: int = Field(default=240, gt=0)
     vvf_step_retries: int = Field(default=2, ge=0, le=10)
 
+    vvf_piper_voice: str | None = None
+    vvf_piper_bin: str = "piper"
+    vvf_elevenlabs_voice_id: str | None = None
+    vvf_elevenlabs_model: str = "eleven_multilingual_v2"
+    vvf_llm_model: str = "claude-opus-5-5"
     vvf_whisper_model: str = "small"
     vvf_whisper_device: str = "cpu"
     vvf_whisper_compute_type: str = "int8"

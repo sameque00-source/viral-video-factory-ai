@@ -16,6 +16,7 @@ class Estimate:
     kind: str
     usd: float | None  # None = preço desconhecido (nunca assumimos zero)
     basis: str  # de onde veio o número, para auditoria
+    local: bool = False  # roda na própria máquina: sem cobrança, não exige VVF_ALLOW_PAID_CALLS
 
 
 class CostGuard:
@@ -43,7 +44,7 @@ class CostGuard:
             params=params or {},
             note=est.basis,
         )
-        if not dry_run:
+        if not dry_run and not est.local:
             if not self.settings.vvf_allow_paid_calls:
                 raise PaidCallsDisabled(
                     "chamadas pagas desativadas: defina VVF_ALLOW_PAID_CALLS=true "

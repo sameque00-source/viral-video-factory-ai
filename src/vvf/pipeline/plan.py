@@ -48,7 +48,7 @@ class Clip(BaseModel):
     score: float = 0.0
     reason: str = ""
     hook: str = ""
-    hook_source: Literal["transcript", "llm"] = "transcript"
+    hook_source: Literal["transcript", "llm", "user"] = "transcript"
     quotes: list[str] = Field(default_factory=list)
     segment_ids: list[int] = Field(default_factory=list)
     title: str = ""
@@ -472,3 +472,9 @@ def approve_plan(project: Project) -> Plan:
     plan.status = "approved"
     save_plan(project, plan)
     return plan
+
+
+def llm_plan_estimate(project: Project, llm: LLMClient, n_clips: int, min_len: float, max_len: float):
+    """Estimativa de custo da geração do plano por LLM (sem chamar a API)."""
+    transcript = load_transcript(project)
+    return llm.estimate(SYSTEM_PROMPT, build_user_prompt(transcript, n_clips, min_len, max_len), 8000)

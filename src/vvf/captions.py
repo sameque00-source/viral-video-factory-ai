@@ -77,7 +77,7 @@ def build_ass(
 ) -> SSAFile:
     subs = SSAFile()
     subs.info["PlayResX"], subs.info["PlayResY"] = str(preset.width), str(preset.height)
-    subs.info["WrapStyle"] = "2"
+    subs.info["WrapStyle"] = "0"  # quebra automática: ganchos longos não vazam das margens
     subs.styles["Default"] = SSAStyle(
         fontname=preset.caption_font, fontsize=preset.caption_size, bold=True,
         primarycolor=WHITE, outlinecolor=Color(0, 0, 0), backcolor=Color(0, 0, 0, 120),

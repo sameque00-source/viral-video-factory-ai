@@ -1,0 +1,4 @@
+{
+  "_comment": "Preencha com precos que VOCE conferiu no site do provedor. Chave: 'provedor:modelo'. Use usd_per_second OU usd_per_video. Sem entrada aqui (ou preco ao vivo da API do fal), execucoes pagas sao recusadas.",
+  "prices": {}
+}

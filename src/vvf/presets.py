@@ -48,3 +48,9 @@ def load_preset(name: str) -> Preset:
     if not path.exists():
         raise UserInputError(f"preset desconhecido: {name} (disponíveis: {available()})")
     return Preset.model_validate_json(path.read_text(encoding="utf-8"))
+
+
+def config_dir() -> Path:
+    """Configurações do projeto que não são presets (ex.: tabela de preços dos provedores)."""
+    override = os.environ.get("VVF_CONFIG_DIR")
+    return Path(override) if override else Path(__file__).resolve().parents[2] / "config"

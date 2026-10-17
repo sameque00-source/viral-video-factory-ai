@@ -103,3 +103,13 @@ def test_manifest_persisted_on_disk(project):
 
     reopened = Project.open(project.root.parent, "demo")
     assert reopened.manifest.steps["s"].status == StepStatus.done
+
+
+def test_every_file_in_presets_dir_is_a_valid_loadable_preset():
+    """Regressão: um JSON de outra natureza em presets/ quebrava o `export` de todos os presets."""
+    from vvf import presets
+
+    names = presets.available()
+    assert {"tiktok", "reels", "shorts"} <= set(names)
+    for name in names:
+        assert presets.load_preset(name).name == name
