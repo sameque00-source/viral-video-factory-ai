@@ -21,6 +21,13 @@ class Settings(BaseSettings):
     vvf_projects_dir: Path = Path("projects")
     vvf_cache_dir: Path = Path(".cache/vvf")
 
+    vvf_language: str = "pt"
+    vvf_scene_threshold: float = Field(default=27.0, gt=0)
+    vvf_min_duration_s: float = Field(default=1.0, gt=0)
+    vvf_max_duration_s: float = Field(default=3 * 3600.0, gt=0)
+    vvf_min_height: int = Field(default=240, gt=0)
+    vvf_step_retries: int = Field(default=2, ge=0, le=10)
+
     vvf_whisper_model: str = "small"
     vvf_whisper_device: str = "cpu"
     vvf_whisper_compute_type: str = "int8"

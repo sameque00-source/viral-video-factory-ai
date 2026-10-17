@@ -1,0 +1,23 @@
+{
+  "name": "tiktok",
+  "width": 1080,
+  "height": 1920,
+  "fps": 30,
+  "video_codec": "libx264",
+  "profile": "high",
+  "x264_preset": "medium",
+  "crf": 19,
+  "maxrate": "10M",
+  "bufsize": "20M",
+  "pix_fmt": "yuv420p",
+  "audio_codec": "aac",
+  "audio_bitrate": "160k",
+  "audio_rate": 48000,
+  "loudness_lufs": -14.0,
+  "true_peak_db": -1.5,
+  "recommended_max_seconds": 60,
+  "caption_font": "Inter",
+  "caption_size": 84,
+  "caption_safe_bottom": 380,
+  "notes": "Meta conservadora definida pelo projeto (nao e o limite oficial da plataforma, que varia por conta/regiao: confira no app antes de publicar)."
+}

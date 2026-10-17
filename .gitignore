@@ -62,3 +62,6 @@ models_cache/
 .omniroute/
 CLAUDE.local.md
 .claude/settings.local.json
+
+# Biblioteca de áudio do usuário (licenças e arquivos locais)
+library/

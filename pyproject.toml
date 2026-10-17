@@ -15,6 +15,8 @@ dependencies = [
     "fal-client>=1.0,<2",
     "replicate>=1.0,<2",
     "faster-whisper>=1.2,<2",
+    "av>=18,<19",  # faster-whisper 1.2.x quebra com av>=19 (metadata_errors)
+    "numpy>=2,<3",
     "scenedetect>=0.7,<1",
     "opencv-python-headless>=4.10",
     "pysubs2>=1.9,<2",
@@ -36,7 +38,7 @@ build-backend = "hatchling.build"
 packages = ["src/vvf"]
 
 [tool.ruff]
-line-length = 100
+line-length = 110
 target-version = "py312"
 src = ["src", "tests"]
 
@@ -46,4 +48,5 @@ select = ["E", "F", "I", "UP", "B"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-ra"
+pythonpath = ["tests"]
 markers = ["cloud: usa serviços pagos; nunca roda por padrão"]
