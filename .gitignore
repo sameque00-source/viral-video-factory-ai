@@ -1,0 +1,64 @@
+# Segredos
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+
+# Node / Bun
+node_modules/
+
+# Vídeo, áudio e imagens de trabalho (nunca versionar mídia)
+*.mp4
+*.mov
+*.mkv
+*.avi
+*.webm
+*.m4v
+*.wav
+*.mp3
+*.aac
+*.flac
+*.png
+*.jpg
+*.jpeg
+*.gif
+!docs/**/*.png
+!docs/**/*.jpg
+
+# Dados de execução do pipeline (projects/ mantém só o .gitkeep)
+projects/*
+!projects/.gitkeep
+.cache/
+cache/
+tmp/
+*.tmp
+*.log
+
+# Modelos baixados
+models_cache/
+*.safetensors
+*.ckpt
+*.onnx
+*.gguf
+
+# Ferramentas de contexto/memória/mapa (artefatos locais)
+.cartographer/
+.claude-mem/
+.headroom/
+.omniroute/
+CLAUDE.local.md
+.claude/settings.local.json

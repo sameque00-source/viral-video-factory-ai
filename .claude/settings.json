@@ -1,0 +1,39 @@
+{
+  "extraKnownMarketplaces": {
+    "claude-plugins-official": { "source": { "source": "github", "repo": "anthropics/claude-plugins-official" } },
+    "cartographer-marketplace": { "source": { "source": "github", "repo": "kingbootoshi/cartographer" } },
+    "remotion": { "source": { "source": "github", "repo": "remotion-dev/claude-code-plugin" } },
+    "thedotmack": { "source": { "source": "github", "repo": "thedotmack/claude-mem" } }
+  },
+  "enabledPlugins": {
+    "claude-code-setup@claude-plugins-official": true,
+    "plugin-dev@claude-plugins-official": true,
+    "context7@claude-plugins-official": true,
+    "cartographer@cartographer-marketplace": true,
+    "remotion@remotion": true,
+    "claude-mem@thedotmack": false
+  },
+  "permissions": {
+    "allow": [
+      "Bash(uv sync:*)",
+      "Bash(uv run pytest:*)",
+      "Bash(uv run ruff:*)",
+      "Bash(ffprobe:*)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      { "hooks": [ { "type": "command", "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/session-start.sh", "timeout": 180 } ] }
+    ],
+    "PreToolUse": [
+      { "matcher": "Edit|Write|MultiEdit", "hooks": [ { "type": "command", "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/guard-secrets.sh" } ] }
+    ],
+    "PostToolUse": [
+      { "matcher": "Edit|Write|MultiEdit", "hooks": [ { "type": "command", "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/ruff-format.sh" } ] }
+    ]
+  }
+}
